@@ -6,70 +6,52 @@
  *
  */
 
-if (window.cordova) {
-    window.document.addEventListener("deviceready", function () {
-        cordova.exec(null, null, "LocalNotification", "ready", []);
-    }, false);
-}
+(function(cordova) {
 
-var localNotification = {
+  window.document.addEventListener("deviceready", function () {
+    cordova.exec(null, null, "LocalNotification", "ready", []);
+  }, false);
 
-	add : function(id, options) {
+  var localNotification = {
 
-		return cordova.exec(null, null, "LocalNotification", "addNotification", [id, options]);
-	},
-
-	cancel : function(id) {
-		return cordova.exec(null, null, "LocalNotification", "cancelNotification", [id]);
-	},
-	
-	cancelAll : function() {
-        return cordova.exec(null, null,"LocalNotification", "cancelAllNotifications", []);
+    add : function(id, options) {
+      return cordova.exec(null, null, "LocalNotification", "addNotification", [id, options]);
     },
-    
+
+    cancel : function(id) {
+      return cordova.exec(null, null, "LocalNotification", "cancelNotification", [id]);
+    },
+
+    cancelAll : function() {
+      return cordova.exec(null, null,"LocalNotification", "cancelAllNotifications", []);
+    },
+
     queue : function(id, options) {
-        
-		return cordova.exec(null, null, "LocalNotification", "queueNotification", [id, options]);
-	},
+      return cordova.exec(null, null, "LocalNotification", "queueNotification", [id, options]);
+    },
 
     getApplicationBadge : function(s) {
-        return cordova.exec(s, null, "LocalNotification", "getApplicationBadge", []);
+      return cordova.exec(s, null, "LocalNotification", "getApplicationBadge", []);
     },
-        
+
     setApplicationBadge : function(intValue, s) {
-        return cordova.exec(s, null, "LocalNotification", "setApplicationBadge", [intValue]);
+      return cordova.exec(s, null, "LocalNotification", "setApplicationBadge", [intValue]);
     }
-
-}
-
+  };
 
 
-/*
-*
-*   Example functions
-*
-
-function sendNotif() {
-    myOptions = {
-        seconds: 30,
-        message: 'chaaaarrrliieeeee',
-        badge: 1
+  /** --------------------------------------------------------------------------
+   * Install as a plugin.
+   */
+  cordova.addConstructor(function () {
+    if (cordova.addPlugin) {
+      cordova.addPlugin("localNotification", LocalNotification);
+    } else {
+      if (!window.plugins) {
+        window.plugins = {};
+      }
+      window.plugins.localNotification = localNotification;
     }
-    localNotification.add( "0", myOptions );
-    
-};
+  });
 
-function cancelLastNotif() {
-    localNotification.cancel( "0" );
-    
-};
-
-function cancelAllNotif() {
-    
-    localNotification.cancelAll();
-    
-};
-
-
-
-*/
+})(window.PhoneGap || window.Cordova || window.cordova);
