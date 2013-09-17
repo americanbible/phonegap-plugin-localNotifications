@@ -131,6 +131,15 @@ static UILocalNotification *localNotification = nil;
         // NO callbacks
     NSDictionary *options = [command.arguments objectAtIndex:1];
     
+        // Repeat support
+    NSMutableDictionary *repeatDict = [[NSMutableDictionary alloc] init];
+    [repeatDict setObject:[NSNumber numberWithInt:NSHourCalendarUnit ] forKey:@"hourly" ];
+    [repeatDict setObject:[NSNumber numberWithInt:NSDayCalendarUnit ] forKey:@"daily" ];
+    [repeatDict setObject:[NSNumber numberWithInt:NSWeekCalendarUnit ] forKey:@"weekly" ];
+    [repeatDict setObject:[NSNumber numberWithInt:NSMonthCalendarUnit ] forKey:@"monthly" ];
+    [repeatDict setObject:[NSNumber numberWithInt:NSYearCalendarUnit ] forKey:@"yearly" ];
+    [repeatDict setObject:[NSNumber numberWithInt:0] forKey:@"" ];
+    
     int seconds                 = [[options objectForKey:@"seconds"] intValue];
 	NSString *msg               = [options objectForKey:@"message"];
         // NSString *action            = [options objectForKey:@"action"];
@@ -138,26 +147,29 @@ static UILocalNotification *localNotification = nil;
 	NSString *notificationId    = [NSString stringWithFormat:@"%@", [command.arguments objectAtIndex:0]];
 	NSInteger badge             = [[options objectForKey:@"badge"] intValue];
 	bool hasAction              = TRUE;
+    NSString *interval    = [options objectForKey:@"repeat"];
 	
+        // Fire date conversion (seems excessively verbose)
     NSTimeInterval secondedDate = ([[NSDate date] timeIntervalSince1970] + seconds);
-    
-	NSDate  *date   = [NSDate dateWithTimeIntervalSince1970:secondedDate];
+    NSDate  *date   = [NSDate dateWithTimeIntervalSince1970:secondedDate];
     
 	UILocalNotification *notif = [[UILocalNotification alloc] init];
     notif.fireDate  = date;
 	notif.hasAction = hasAction;
 	notif.timeZone  = [NSTimeZone defaultTimeZone];
-	
+    notif.repeatInterval = [[repeatDict objectForKey: interval] intValue];
+    
 	notif.alertBody = ([msg isEqualToString:@""])?nil:msg;
 	notif.alertAction = action;
 	notif.soundName = UILocalNotificationDefaultSoundName;
 	notif.applicationIconBadgeNumber = badge;
+    
         // allow for alert message and notificationId to be passed during callback
     NSDictionary *userDict = [NSDictionary dictionaryWithObjects:[NSArray arrayWithObjects:notificationId,notif.alertBody,nil]
                                                          forKeys:[NSArray arrayWithObjects:@"notificationId",@"msg",nil]];
 	notif.userInfo = userDict;
     
-        // check for existing notification with same id?
+        // check for existing notification with same id
     NSArray *notifications      = [[UIApplication sharedApplication] scheduledLocalNotifications];
     
     for (UILocalNotification *notification in notifications) {
@@ -170,7 +182,7 @@ static UILocalNotification *localNotification = nil;
     }
     
         // now schedule new one
-    NSLog(@"Notification Set: %@ (ID: %@, Badge: %i)", date , notificationId, badge);
+    NSLog(@"Notification Set: %@ (ID: %@, Badge: %i, Interval: %u)", date , notificationId, badge, notif.repeatInterval);
     [[UIApplication sharedApplication] scheduleLocalNotification:notif];
     
 	[notif release];
