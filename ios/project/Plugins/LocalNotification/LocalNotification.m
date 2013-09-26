@@ -210,7 +210,10 @@ static UILocalNotification *localNotification = nil;
         active = @"false";
     }
     
-    NSString *jsString = [NSString stringWithFormat:@"cordova.fireDocumentEvent('receivedLocalNotification', { active : %@, notificationId : \'%@\', msg:  \'%@\' })", active, [[notification.object userInfo] objectForKey:@"notificationId"],[[notification.object userInfo] objectForKey:@"msg"]];
+    NSString *notifMsg = [[notification.object userInfo] objectForKey:@"msg"];
+    NSString *escapedMsg = [notifMsg stringByReplacingOccurrencesOfString:@"\'" withString:@"\\\'"];
+
+    NSString *jsString = [NSString stringWithFormat:@"cordova.fireDocumentEvent('receivedLocalNotification', { active : %@, notificationId : \'%@\', msg:  \'%@\' })", active, [[notification.object userInfo] objectForKey:@"notificationId"], escapedMsg];
     NSLog(@"CALLING JAVASCRIPT METHOD: %@", jsString);
     [self.webView stringByEvaluatingJavaScriptFromString:jsString];
 }
